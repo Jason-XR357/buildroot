@@ -1,0 +1,36 @@
+#!/bin/sh
+
+cd /tmp
+
+clear
+
+echo "Waiting for the USBSI device to be found"
+while [ ! -e /dev/ttyACM0 ]; do
+  sleep 1
+done
+
+ln -s /dev/ttyACM0 /dev/serial/by-id/usb-RJG_Inc._Lynx_USBSI_17LS200001-if00
+
+# this export allows for running lspob without a path prefix
+#export PATH=/mnt/storage/realtime/bin/tools:$PATH
+#export LD_LIBRARY_PATH=/mnt/storage/realtime/lib
+
+/usr/bin/RTService &
+#/usr/bin/RTService > /dev/null &
+
+echo "waiting for lynx sensors to be detected"
+sleep 1
+echo "."
+sleep 1
+echo "."
+sleep 1
+
+/usr/bin/tools/hardware_tester
+
+echo
+echo "Press enter to poweroff"
+
+read
+
+echo "This normally would poweroff instead of starting a shell"
+/bin/sh

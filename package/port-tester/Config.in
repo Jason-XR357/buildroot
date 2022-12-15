@@ -1,0 +1,4 @@
+config BR2_PACKAGE_PORT_TESTER
+        bool "Copilot Port Tester"
+        help
+          This tests the ports on AP32C and AP4.0 hardware

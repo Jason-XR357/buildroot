@@ -1,0 +1,6 @@
+::sysinit:/etc/sysinit
+::restart:/sbin/init
+::shutdown:sync
+::shutdown:umount -a -r
+::ctrlaltdel:/sbin/reboot
+::respawn:/etc/start_task

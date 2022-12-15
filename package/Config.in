@@ -2201,6 +2201,10 @@ menu "Miscellaneous"
 	source "package/z3/Config.in"
 endmenu
 
+menu "Custom"
+	source "package/port-tester/Config.in"
+endmenu
+
 menu "Networking applications"
 	source "package/aircrack-ng/Config.in"
 	source "package/alfred/Config.in"

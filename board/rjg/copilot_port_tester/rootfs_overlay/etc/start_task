@@ -11,7 +11,7 @@ done
 
 ln -s /dev/ttyACM0 /dev/serial/by-id/usb-RJG_Inc._Lynx_USBSI_17LS200001-if00
 
-/usr/bin/RTService > /dev/null &
+/usr/bin/RTService > /dev/null 2> /dev/null &
 
 echo "waiting for lynx sensors to be detected"
 sleep 1

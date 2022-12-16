@@ -17,18 +17,20 @@ define PORT_TESTER_BUILD_CMDS
     else \
         git clone --single-branch -b hardware_tester git@github.com:rjginc/realtime.git $(@D)/a ; \
         cd $(@D)/a/development/library ; rm -Rf interop src/protobuf src/ProtobufBuffer.cc src/valve_gate_utility.cc ; \
-        cd $(@D)/a/development/system/RTService/plugins ; rm -Rf ControlSystem ethercat HeaterTweeter Sequencer Simulator TimingSignalProcessor USB_diags mark10_driver ; \
+        cd $(@D)/a/development/system/RTService/plugins ; rm -Rf ControlSystem ethercat HeaterTweeter Sequencer Simulator TimingSignalProcessor USB_diags mark10_driver \
         rm $(@D)/a/development/build_mode.cfg ; \
+        sed -i 's/-lprotobuf//' $(@D)/a/development/Makefile ; \
     fi
-    cd $(@D)/a/development/library ; $(MAKE) CXX="$(TARGET_CXX)" CC="$(TARGET_CC)" LD="$(TARGET_LD)" BUILD_DIR=tmp TARGET_DIR=out sensor_tester=1 release
-    cd $(@D)/a/development/system/RTService ; $(MAKE) CXX="$(TARGET_CXX)" CC="$(TARGET_CC)" LD="$(TARGET_LD)" BUILD_DIR=tmp TARGET_DIR=out sensor_tester=1 release
-    cd $(@D)/a/development/system/RTService/plugins ; $(MAKE) CXX="$(TARGET_CXX)" CC="$(TARGET_CC)" LD="$(TARGET_LD)" BUILD_DIR=tmp TARGET_DIR=out sensor_tester=1 release
-    cd $(@D)/a/development/tools/hardware_tester ; $(MAKE) CXX="$(TARGET_CXX)" CC="$(TARGET_CC)" LD="$(TARGET_LD)" BUILD_DIR=tmp TARGET_DIR=out sensor_tester=1 release
+    cd $(@D)/a/development/library ; $(MAKE) sensor_tester=1 CXX="$(TARGET_CXX)" CC="$(TARGET_CC)" LD="$(TARGET_LD)" BUILD_DIR=tmp TARGET_DIR=out release
+    cd $(@D)/a/development/system/RTService ; $(MAKE) sensor_tester=1 CXX="$(TARGET_CXX)" CC="$(TARGET_CC)" LD="$(TARGET_LD)" BUILD_DIR=tmp TARGET_DIR=out release
+    cd $(@D)/a/development/system/RTService/plugins ; $(MAKE) sensor_tester=1 CXX="$(TARGET_CXX)" CC="$(TARGET_CC)" LD="$(TARGET_LD)" BUILD_DIR=tmp TARGET_DIR=out release
+    cd $(@D)/a/development/tools/hardware_tester ; $(MAKE) CXX="$(TARGET_CXX)" CC="$(TARGET_CC)" LD="$(TARGET_LD)" BUILD_DIR=tmp TARGET_DIR=out release
 endef
 
 define PORT_TESTER_INSTALL_TARGET_CMDS
     cp -Rv $(@D)/a/out/bin/* $(TARGET_DIR)/usr/bin
     cp -Rv $(@D)/a/out/lib/* $(TARGET_DIR)/usr/lib
+    cp -v $(@D)/a/development/tools/hardware_tester/hardware.csv $(TARGET_DIR)/usr/bin/tools
 endef
 
 $(eval $(generic-package))

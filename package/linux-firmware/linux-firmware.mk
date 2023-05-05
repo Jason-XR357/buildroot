@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-LINUX_FIRMWARE_VERSION = 20221109
+LINUX_FIRMWARE_VERSION = 20221214
 LINUX_FIRMWARE_SOURCE = linux-firmware-$(LINUX_FIRMWARE_VERSION).tar.xz
 LINUX_FIRMWARE_SITE = $(BR2_KERNEL_MIRROR)/linux/kernel/firmware
 LINUX_FIRMWARE_INSTALL_IMAGES = YES
@@ -71,7 +71,9 @@ LINUX_FIRMWARE_FILES += \
 	rtl_bt/rtl8723a_fw.bin rtl_bt/rtl8723b_fw.bin \
 	rtl_bt/rtl8723bs_config-OBDA8723.bin \
 	rtl_bt/rtl8723bs_fw.bin rtl_bt/rtl8723d_config.bin \
-	rtl_bt/rtl8723d_fw.bin rtl_bt/rtl8761a_fw.bin
+	rtl_bt/rtl8723d_fw.bin rtl_bt/rtl8761a_fw.bin \
+	rtl_bt/rtl8761b_fw.bin rtl_bt/rtl8761b_config.bin \
+	rtl_bt/rtl8761bu_fw.bin rtl_bt/rtl8761bu_config.bin
 LINUX_FIRMWARE_ALL_LICENSE_FILES += LICENCE.rtlwifi_firmware.txt
 endif
 
@@ -584,6 +586,7 @@ LINUX_FIRMWARE_FILES += \
 	rtl_nic/rtl8107e-1.fw \
 	rtl_nic/rtl8107e-2.fw \
 	rtl_nic/rtl8125a-3.fw \
+	rtl_nic/rtl8125b-2.fw \
 	rtl_nic/rtl8168d-1.fw \
 	rtl_nic/rtl8168d-2.fw \
 	rtl_nic/rtl8168e-1.fw \

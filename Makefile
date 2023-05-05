@@ -1,8 +1,6 @@
 # Makefile for buildroot
 #
-# Copyright (C) 1999-2005 by Erik Andersen <andersen@codepoet.org>
-# Copyright (C) 2006-2014 by the Buildroot developers <buildroot@uclibc.org>
-# Copyright (C) 2014-2020 by the Buildroot developers <buildroot@buildroot.org>
+# Copyright (C) the Buildroot developers <buildroot@buildroot.org>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -92,9 +90,9 @@ all:
 .PHONY: all
 
 # Set and export the version string
-export BR2_VERSION := 2023.02-git
+export BR2_VERSION := 2023.05-git
 # Actual time the release is cut (for reproducible builds)
-BR2_VERSION_EPOCH = 1669308000
+BR2_VERSION_EPOCH = 1678652000
 
 # Save running make version since it's clobbered by the make package
 RUNNING_MAKE_VERSION := $(MAKE_VERSION)
@@ -125,7 +123,7 @@ endif
 noconfig_targets := menuconfig nconfig gconfig xconfig config oldconfig randconfig \
 	defconfig %_defconfig allyesconfig allnoconfig alldefconfig syncconfig release \
 	randpackageconfig allyespackageconfig allnopackageconfig \
-	print-version olddefconfig distclean manual manual-% check-package check-flake8
+	print-version olddefconfig distclean manual manual-% check-package
 
 # Some global targets do not trigger a build, but are used to collect
 # metadata, or do various checks. When such targets are triggered,
@@ -1013,13 +1011,18 @@ oldconfig syncconfig olddefconfig: $(BUILD_DIR)/buildroot-config/conf outputmake
 defconfig: $(BUILD_DIR)/buildroot-config/conf outputmakefile
 	@$(COMMON_CONFIG_ENV) $< --defconfig$(if $(DEFCONFIG),=$(DEFCONFIG)) $(CONFIG_CONFIG_IN)
 
-define percent_defconfig
-# Override the BR2_DEFCONFIG from COMMON_CONFIG_ENV with the new defconfig
-%_defconfig: $(BUILD_DIR)/buildroot-config/conf $(1)/configs/%_defconfig outputmakefile
-	@$$(COMMON_CONFIG_ENV) BR2_DEFCONFIG=$(1)/configs/$$@ \
-		$$< --defconfig=$(1)/configs/$$@ $$(CONFIG_CONFIG_IN)
-endef
-$(eval $(foreach d,$(call reverse,$(TOPDIR) $(BR2_EXTERNAL_DIRS)),$(call percent_defconfig,$(d))$(sep)))
+%_defconfig: $(BUILD_DIR)/buildroot-config/conf  outputmakefile
+	@defconfig=$(or \
+		$(firstword \
+			$(foreach d, \
+				$(call reverse,$(TOPDIR) $(BR2_EXTERNAL_DIRS)), \
+				$(wildcard $(d)/configs/$@) \
+			) \
+		), \
+		$(error "Can't find $@") \
+	); \
+	$(COMMON_CONFIG_ENV) BR2_DEFCONFIG=$${defconfig} \
+		$< --defconfig=$${defconfig} $(CONFIG_CONFIG_IN)
 
 update-defconfig: savedefconfig
 
@@ -1039,7 +1042,7 @@ savedefconfig: $(BUILD_DIR)/buildroot-config/conf outputmakefile
 
 # staging and target directories do NOT list these as
 # dependencies anywhere else
-$(BUILD_DIR) $(BASE_TARGET_DIR) $(HOST_DIR) $(BINARIES_DIR) $(LEGAL_INFO_DIR) $(REDIST_SOURCES_DIR_TARGET) $(REDIST_SOURCES_DIR_HOST) $(PER_PACKAGE_DIR):
+$(BASE_DIR) $(BUILD_DIR) $(BASE_TARGET_DIR) $(HOST_DIR) $(BINARIES_DIR) $(LEGAL_INFO_DIR) $(REDIST_SOURCES_DIR_TARGET) $(REDIST_SOURCES_DIR_HOST) $(PER_PACKAGE_DIR):
 	@mkdir -p $@
 
 # outputmakefile generates a Makefile in the output directory, if using a
@@ -1246,17 +1249,14 @@ release:
 print-version:
 	@echo $(BR2_VERSION_FULL)
 
-check-flake8:
-	$(Q)git ls-tree -r --name-only HEAD \
-	| xargs file \
-	| grep 'Python script' \
-	| cut -d':' -f1 \
-	| xargs -- python3 -m flake8 --statistics
-
 check-package:
-	find $(TOPDIR) -type f \( -name '*.mk' -o -name '*.hash' -o -name 'Config.*' -o -name '*.patch' \) \
-		-a -not -name '*.orig' -a -not -name '*.rej' \
-		-exec ./utils/check-package --exclude=Sob {} +
+	$(Q)./utils/check-package `git ls-tree -r --name-only HEAD` \
+		--ignore-list=$(TOPDIR)/.checkpackageignore
+
+.PHONY: .checkpackageignore
+.checkpackageignore:
+	$(Q)./utils/check-package --failed-only `git ls-tree -r --name-only HEAD` \
+		> .checkpackageignore
 
 include docs/manual/manual.mk
 -include $(foreach dir,$(BR2_EXTERNAL_DIRS),$(sort $(wildcard $(dir)/docs/*/*.mk)))
